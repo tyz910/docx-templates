@@ -1,0 +1,18 @@
+{
+    "name": "tyz910/docx-templates",
+    "description": "Simple template engine for .docx",
+    "keywords": ["docx", "template", "word"],
+    "authors": [
+        {
+            "name": "Eugene Ivanov",
+            "email": "tyz910@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "ext-zip": "*"
+    },
+    "autoload": {
+        "psr-0": { "DocxTemplate": "src/" }
+    }
+}
