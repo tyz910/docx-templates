@@ -6,9 +6,113 @@ use DocxTemplate\Template;
 
 class TemplateTest extends BaseTestCase
 {
-    public function testTest()
+    /**
+     * @var Template
+     */
+    private $template;
+
+    protected function setUp()
     {
-        $template = new Template(new Document($this->getFixturePath('data/test.docx')));
-        $this->assertNotNull($template);
+        $this->template = new Template(new Document($this->getFixturePath('data/test.docx')));
+        parent::setUp();
+    }
+
+    /**
+     * @return string
+     */
+    private function saveAndGetContent()
+    {
+        $path = $this->getFixturePath('processed/doc.docx');
+        $this->template->save($path);
+        $doc = new Document($path);
+
+        return $doc->getContent();
+    }
+
+    public function testAssign()
+    {
+        $this->template->assign('var1', 'val1');
+        $content = $this->saveAndGetContent();
+        $this->assertContains('val1', $content);
+    }
+
+    public function testMultipleAssign()
+    {
+        $this->template->assign([
+            'var1' => 'val1',
+            'var2' => 'val2'
+        ]);
+        $content = $this->saveAndGetContent();
+        $this->assertContains('val1', $content);
+        $this->assertContains('val2', $content);
+    }
+
+    public function testAssignSpecSymbols()
+    {
+        $this->template->assign('var1', '<special_symbols>');
+        $content = $this->saveAndGetContent();
+        $this->assertContains('&lt;special_symbols&gt;', $content);
+    }
+
+    public function testAssignInline()
+    {
+        $this->template->assign('var4', 'text');
+        $content = $this->saveAndGetContent();
+        $this->assertContains('inlinetext', $content);
+    }
+
+    public function testAssignUtf8()
+    {
+        $this->template->assign('var3', 'русский текст');
+        $content = $this->saveAndGetContent();
+        $this->assertContains('русский текст', $content);
+    }
+
+    public function testAssignWrongMarkName()
+    {
+        $this->setExpectedException('DocxTemplate\Exception\Template\WrongMarkNameException');
+        $this->template->assign('var 1', 'val1');
+    }
+
+    public function testGetMarks()
+    {
+        $this->assertEquals(['var1', 'var2', 'var3', 'var4'], $this->template->getMarks());
+
+        $this->template->assign([
+            'var1' => 'val1',
+            'var2' => 'val2'
+        ]);
+        $this->assertEquals(['var3', 'var4'], $this->template->getMarks());
+
+        $this->template->assign([
+            'var3' => 'val3',
+            'var4' => 'val4'
+        ]);
+        $this->assertEquals([], $this->template->getMarks());
+    }
+
+    public function testIsFilled()
+    {
+        $this->assertFalse($this->template->isFilled());
+
+        $this->template->assign([
+            'var1' => 'val1',
+            'var2' => 'val2',
+            'var3' => 'val3',
+            'var4' => 'val4'
+        ]);
+
+        $this->assertTrue($this->template->isFilled());
+    }
+
+    public function testRemoveMarks()
+    {
+        $this->template->removeMarks();
+        $content = $this->saveAndGetContent();
+
+        $this->assertNotContains('var1', $content);
+        $this->assertNotContains('var2', $content);
+        $this->assertNotContains('var3', $content);
+        $this->assertNotContains('var4', $content);
     }
 }

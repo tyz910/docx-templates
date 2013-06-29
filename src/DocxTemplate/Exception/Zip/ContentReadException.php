@@ -8,6 +8,6 @@ class ContentReadException extends ZipException
      */
     public function __construct($uri)
     {
-        parent::__construct(sprintf("Failed to read content from uri: '%s'", $uri));
+        parent::__construct(sprintf("Failed to read content from uri: '%s'.", $uri));
     }
 }

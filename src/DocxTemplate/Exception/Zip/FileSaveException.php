@@ -9,7 +9,7 @@ class FileSaveException extends ZipException
      */
     public function __construct($filePath, $reason = null)
     {
-        $message = sprintf("Failed to save file to '%s'", $filePath);
+        $message = sprintf("Failed to save file to '%s'.", $filePath);
 
         if ($reason) {
             $message .= sprintf('. Reason: %s', $reason);

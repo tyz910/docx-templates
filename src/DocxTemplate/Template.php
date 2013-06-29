@@ -3,7 +3,8 @@ namespace DocxTemplate;
 
 class Template
 {
-    const DEFAULT_MARK_PATTERN = '{{%s}}';
+    const DEFAULT_MARK_PATTERN = '{{%s}}'; // how to display mark in template (printf format, where %s - mark name)
+    const MARK_REGEXP = '[a-z0-9_]+';      // mark name limitations
 
     /**
      * @var Document
@@ -11,6 +12,8 @@ class Template
     private $doc;
 
     /**
+     * todo move to Document
+     *
      * @var string
      */
     private $docContent;
@@ -18,7 +21,7 @@ class Template
     /**
      * @var string
      */
-    private $markPattern;
+    private $replaceRegexp;
 
     /**
      * @param Document $doc
@@ -28,7 +31,30 @@ class Template
     {
         $this->doc = $doc;
         $this->docContent = $doc->getContent();
-        $this->markPattern = $markPattern;
+        $this->replaceRegexp = $this->convertPattern($markPattern);
+    }
+
+    /**
+     * @param string $pattern
+     * @return string
+     */
+    private function convertPattern($pattern)
+    {
+        list($open, $close) = explode('%s', $pattern);
+
+        $spacePattern = '(<(?:(?!>.<).)*>|)'; // trash tags without content or empty
+        $regexp =
+            '/'
+                .'( |)' // for save space if after replacement it will be on the end of tag without xml:space="preserve"
+                .preg_quote($open)
+                    .$spacePattern
+                        .'%s'
+                    .$spacePattern
+                .preg_quote($close)
+            .'/u'
+        ;
+
+        return $regexp;
     }
 
     /**
@@ -36,7 +62,36 @@ class Template
      */
     public function save($filePath = null)
     {
-        $this->doc->save($filePath);
+        $this->doc
+            ->setContent($this->docContent)
+            ->save($filePath)
+        ;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getMarks()
+    {
+        $pattern = sprintf($this->replaceRegexp, '(?P<mark>' . self::MARK_REGEXP . ')');
+        preg_match_all($pattern, $this->docContent, $matches);
+
+        return array_unique($matches['mark']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFilled()
+    {
+        return ! (bool) $this->getMarks();
+    }
+
+    public function removeMarks()
+    {
+        foreach ($this->getMarks() as $mark) {
+            $this->assign($mark, '');
+        }
     }
 
     /**
@@ -51,7 +106,7 @@ class Template
                 $this->assignVar($k, $v);
             }
         } else {
-            $this->assign($key, $value);
+            $this->assignVar($key, $value);
         }
 
         return $this;
@@ -63,17 +118,27 @@ class Template
      */
     private function assignVar($key, $value)
     {
-        // todo
+        $this->validateMarkName($key);
+
+        $pattern = sprintf($this->replaceRegexp, preg_quote($key));
+        $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+        $replace = function ($matches) use ($value) {
+            $space = $matches[1] == ' ' ? '&#160;' : ''; /** save space @see convertPattern */
+            return $matches[2] . $space . $value . $matches[3];
+        };
+
+        $this->docContent = preg_replace_callback($pattern, $replace, $this->docContent);
     }
 
     /**
-     * @param string $from
-     * @param string $to
-     * @return $this
+     * @param string $mark
+     * @throws Exception\Template\WrongMarkNameException
      */
-    public function clearBlock($from, $to)
+    private function validateMarkName($mark)
     {
-        // todo
-        return $this;
+        if (!preg_match(sprintf('/^%s$/u', self::MARK_REGEXP), $mark)) {
+            throw new Exception\Template\WrongMarkNameException($mark);
+        }
     }
 }

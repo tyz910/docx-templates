@@ -48,7 +48,7 @@ class Document
         }
 
         if (file_exists($filePath)) {
-            if (unlink($filePath) == false) {
+            if (unlink($filePath) === false) {
                 throw new Exception\Zip\FileSaveException($filePath, 'unlink error');
             }
         }
@@ -57,7 +57,7 @@ class Document
             throw new Exception\Zip\FileSaveException($filePath, 'could not close zip file');
         }
 
-        if (rename($this->tmpFilePath, $filePath) == false) {
+        if (rename($this->tmpFilePath, $filePath) === false) {
             throw new Exception\Zip\FileSaveException($filePath, 'rename error');
         }
     }

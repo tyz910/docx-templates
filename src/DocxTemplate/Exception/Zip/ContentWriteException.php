@@ -9,6 +9,6 @@ class ContentWriteException extends ZipException
      */
     public function __construct($uri, $content)
     {
-        parent::__construct(sprintf("Failed to write content to uri: '%s'. Content:\r\n", $uri, $content));
+        parent::__construct(sprintf("Failed to write content to uri: '%s'. Content:\r\n%s", $uri, $content));
     }
 }

@@ -9,7 +9,7 @@ class FileCopyException extends ZipException
      */
     public function __construct($from, $to)
     {
-        $message = sprintf('Failed to copy file from %s to %s', $from, $to);
+        $message = sprintf("Failed to copy file from '%s' to '%s'.", $from, $to);
         parent::__construct($message);
     }
 }
