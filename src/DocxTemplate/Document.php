@@ -21,6 +21,11 @@ class Document
     private $tmpFilePath;
 
     /**
+     * @var array
+     */
+    private $content = [];
+
+    /**
      * @param string $filePath
      * @throws Exception\Zip\FileCopyException
      */
@@ -43,6 +48,10 @@ class Document
      */
     public function save($filePath = null)
     {
+        foreach ($this->content as $uri => $content) {
+            $this->writeContent($content, $uri);
+        }
+
         if ($filePath === null) {
             $filePath = $this->origFilePath;
         }
@@ -69,22 +78,36 @@ class Document
      */
     public function getContent($uri = self::DOCUMENT_XML_URI)
     {
-        $content = $this->zip->getFromName($uri);
+        if (!array_key_exists($uri, $this->content)) {
+            $content = $this->zip->getFromName($uri);
+            if ($content === false) {
+                throw new Exception\Zip\ContentReadException($uri);
+            }
 
-        if ($content === false) {
-            throw new Exception\Zip\ContentReadException($uri);
-        } else {
-            return $content;
+            $this->content[$uri] = $content;
         }
+
+        return $this->content[$uri];
     }
 
     /**
      * @param string $content
      * @param string $uri
-     * @throws \Exception
      * @return $this
      */
     public function setContent($content, $uri = self::DOCUMENT_XML_URI)
+    {
+        $this->content[$uri] = $content;
+        return $this;
+    }
+
+    /**
+     * @param string $content
+     * @param string $uri
+     * @throws Exception\Zip\ContentWriteException
+     * @return $this
+     */
+    private function writeContent($content, $uri)
     {
         $result = $this->zip->addFromString($uri, $content);
 

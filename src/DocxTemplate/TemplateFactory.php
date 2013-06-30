@@ -6,7 +6,7 @@ class TemplateFactory
     /**
      * @var string
      */
-    private static $markPattern = Template::DEFAULT_MARK_PATTERN;
+    private static $markPattern = Template::MARK_DEFAULT_PATTERN;
 
     /**
      * @param string $filePath
