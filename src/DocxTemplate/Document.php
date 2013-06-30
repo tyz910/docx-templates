@@ -13,62 +13,103 @@ class Document
     /**
      * @var string
      */
-    private $origFilePath;
-
-    /**
-     * @var string
-     */
-    private $tmpFilePath;
+    private $filePath;
 
     /**
      * @var array
      */
-    private $content = [];
+    private $readCache = [];
+
+    /**
+     * @var array
+     */
+    private $writeCache = [];
 
     /**
      * @param string $filePath
-     * @throws Exception\Zip\FileCopyException
      */
     public function __construct($filePath)
     {
-        $this->origFilePath = realpath($filePath);
-        $this->tmpFilePath = sys_get_temp_dir() . '/' . uniqid('docx');
-
-        if (copy($this->origFilePath, $this->tmpFilePath)) {
-            $this->zip = new \ZipArchive();
-            $this->zip->open($this->tmpFilePath);
-        } else {
-            throw new Exception\Zip\FileCopyException($this->origFilePath, $this->tmpFilePath);
-        }
+        $this->filePath = $filePath;
+        $this->zip = new \ZipArchive();
     }
 
     /**
      * @param string $filePath
-     * @throws Exception\Zip\FileSaveException
+     * @return $this
+     * @throws Exception\Zip\FileOpenException
+     */
+    private function zipOpen($filePath)
+    {
+        if ($code = $this->zip->open($filePath) !== true) {
+            throw new Exception\Zip\FileOpenException($filePath, $code);
+        }
+
+        $this->filePath = $filePath;
+        return $this;
+    }
+
+    /**
+     * @return \ZipArchive
+     */
+    private function getZip()
+    {
+        if (!$this->zip->filename) {
+            $this->zipOpen($this->filePath);
+        }
+
+        return $this->zip;
+    }
+
+    /**
+     * @return $this
+     * @throws Exception\Zip\FileCloseException
+     */
+    private function zipClose()
+    {
+        if ($this->getZip()->close() === false) {
+            throw new Exception\Zip\FileCloseException($this->zip->filename);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $newFilePath
+     * @return $this
+     * @throws Exception\Zip\FileCopyException
+     */
+    private function zipCopy($newFilePath)
+    {
+        $this->zipClose();
+        $origFilePath = $this->filePath;
+
+        if (copy($origFilePath, $newFilePath)) {
+            $this->zipOpen($newFilePath);
+        } else {
+            throw new Exception\Zip\FileCopyException($origFilePath, $newFilePath);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $filePath
      */
     public function save($filePath = null)
     {
-        foreach ($this->content as $uri => $content) {
+        if ($filePath) {
+            $this->zipCopy($filePath);
+        }
+
+        foreach ($this->writeCache as $uri => $content) {
             $this->writeContent($content, $uri);
         }
 
-        if ($filePath === null) {
-            $filePath = $this->origFilePath;
-        }
+        $this->zipClose();
+        $this->readCache = $this->writeCache = [];
 
-        if (file_exists($filePath)) {
-            if (unlink($filePath) === false) {
-                throw new Exception\Zip\FileSaveException($filePath, 'unlink error');
-            }
-        }
-
-        if ($this->zip->close() === false) {
-            throw new Exception\Zip\FileSaveException($filePath, 'could not close zip file');
-        }
-
-        if (rename($this->tmpFilePath, $filePath) === false) {
-            throw new Exception\Zip\FileSaveException($filePath, 'rename error');
-        }
+        return $this;
     }
 
     /**
@@ -78,16 +119,16 @@ class Document
      */
     public function getContent($uri = self::DOCUMENT_XML_URI)
     {
-        if (!array_key_exists($uri, $this->content)) {
-            $content = $this->zip->getFromName($uri);
+        if (!array_key_exists($uri, $this->readCache)) {
+            $content = $this->getZip()->getFromName($uri);
             if ($content === false) {
                 throw new Exception\Zip\ContentReadException($uri);
             }
 
-            $this->content[$uri] = $content;
+            $this->readCache[$uri] = $content;
         }
 
-        return $this->content[$uri];
+        return $this->readCache[$uri];
     }
 
     /**
@@ -97,7 +138,7 @@ class Document
      */
     public function setContent($content, $uri = self::DOCUMENT_XML_URI)
     {
-        $this->content[$uri] = $content;
+        $this->readCache[$uri] = $this->writeCache[$uri] = $content;
         return $this;
     }
 
@@ -109,7 +150,7 @@ class Document
      */
     private function writeContent($content, $uri)
     {
-        $result = $this->zip->addFromString($uri, $content);
+        $result = $this->getZip()->addFromString($uri, $content);
 
         if ($result === false) {
             throw new Exception\Zip\ContentWriteException($uri, $content);
