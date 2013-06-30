@@ -33,3 +33,15 @@ use DocxTemplate\TemplateFactory;
 TemplateFactory::setMarkPattern('${%s}'); // %s will be replaced with mark name
 $template = TemplateFactory::load('template.docx');
 ```
+
+## Installation using [Composer](http://getcomposer.org/)
+
+Add to your `composer.json`:
+
+```json
+{
+    "require" :  {
+        "tyz910/docx-templates": "*"
+    }
+}
+```
