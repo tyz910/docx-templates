@@ -2,6 +2,7 @@
 namespace DocxTemplate\Tests;
 
 use DocxTemplate\Document;
+use DocxTemplate\Matcher;
 use DocxTemplate\Template;
 
 class TemplateTest extends BaseTestCase
@@ -13,7 +14,10 @@ class TemplateTest extends BaseTestCase
 
     protected function setUp()
     {
-        $this->template = new Template(new Document($this->getFixturePath('test.docx')));
+        $this->template = new Template(
+            new Document($this->getFixturePath('test.docx')),
+            new Matcher()
+        );
         parent::setUp();
     }
 

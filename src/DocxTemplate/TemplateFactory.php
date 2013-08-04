@@ -4,27 +4,15 @@ namespace DocxTemplate;
 class TemplateFactory
 {
     /**
-     * @var string
-     */
-    private static $markPattern = Template::MARK_DEFAULT_PATTERN;
-
-    /**
      * @param string $filePath
+     * @param string $markPattern
      * @return Template
      */
-    public static function load($filePath)
+    public static function load($filePath, $markPattern = Matcher::MARK_DEFAULT_PATTERN)
     {
         return new Template(
             new Document($filePath),
-            self::$markPattern
+            new Matcher($markPattern) // todo cache
         );
-    }
-
-    /**
-     * @param string $pattern
-     */
-    public static function setMarkPattern($pattern)
-    {
-        self::$markPattern = $pattern;
     }
 }
