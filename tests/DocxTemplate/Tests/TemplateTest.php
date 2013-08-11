@@ -13,7 +13,7 @@ class TemplateTest extends BaseTestCase
 
     protected function setUp()
     {
-        $this->template = new Template(new Document($this->getFixturePath('data/test.docx')));
+        $this->template = new Template(new Document($this->getFixturePath('test.docx')));
         parent::setUp();
     }
 
@@ -22,7 +22,7 @@ class TemplateTest extends BaseTestCase
      */
     private function saveAndGetContent()
     {
-        $path = $this->getFixturePath('processed/doc.docx');
+        $path = $this->getRuntimePath('doc.docx');
         $this->template->save($path);
         $doc = new Document($path);
 

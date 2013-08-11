@@ -4,7 +4,11 @@ php:
   - 5.4
 
 script:
-  - phpunit
+  - phpunit --coverage-clover tests/runtime/clover.xml
 
 before_script:
+  - composer require satooshi/php-coveralls 0.6.*
   - composer update
+
+after_script:
+  - php vendor/bin/coveralls -v

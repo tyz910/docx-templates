@@ -1,6 +1,7 @@
 docX-templates
 ==============
 [![Build Status](https://travis-ci.org/tyz910/docx-templates.png?branch=master)](https://travis-ci.org/tyz910/docx-templates)
+[![Coverage Status](https://coveralls.io/repos/tyz910/docx-templates/badge.png?branch=master)](https://coveralls.io/r/tyz910/docx-templates?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/tyz910/docx-templates/v/stable.png)](https://packagist.org/packages/tyz910/docx-templates)
 
 You can create a .docx template file with included search-patterns that can be replaced by any value you wish:
