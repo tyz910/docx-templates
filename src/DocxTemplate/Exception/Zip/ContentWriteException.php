@@ -5,7 +5,7 @@ class ContentWriteException extends ZipException
 {
     /**
      * @param string $uri
-     * @param int $content
+     * @param int    $content
      */
     public function __construct($uri, $content)
     {

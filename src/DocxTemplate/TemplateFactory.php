@@ -4,8 +4,8 @@ namespace DocxTemplate;
 class TemplateFactory
 {
     /**
-     * @param string $filePath
-     * @param string $markPattern
+     * @param  string   $filePath
+     * @param  string   $markPattern
      * @return Template
      */
     public static function load($filePath, $markPattern = Matcher::MARK_DEFAULT_PATTERN)

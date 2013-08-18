@@ -44,8 +44,8 @@ class Document
         if ($code = $this->zip->open($filePath) !== true) {
             throw new Exception\Zip\FileOpenException($filePath, $code);
         }
-
         $this->filePath = $filePath;
+
         return $this;
     }
 
@@ -95,6 +95,7 @@ class Document
 
     /**
      * @param string $filePath
+     * @return $this
      */
     public function save($filePath = null)
     {
@@ -113,7 +114,7 @@ class Document
     }
 
     /**
-     * @param string $uri
+     * @param  string $uri
      * @throws Exception\Zip\ContentReadException
      * @return string
      */

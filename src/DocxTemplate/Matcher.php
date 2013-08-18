@@ -21,7 +21,7 @@ class Matcher
     }
 
     /**
-     * @param string $pattern
+     * @param  string $pattern
      * @return string
      */
     private function convertPattern($pattern)
@@ -54,9 +54,9 @@ class Matcher
     }
 
     /**
-     * @param string $key
-     * @param string $value
-     * @param string $text
+     * @param  string $key
+     * @param  string $value
+     * @param  string $text
      * @return string
      */
     public function replaceMark($key, $value, $text)
@@ -68,6 +68,7 @@ class Matcher
 
         $replace = function ($matches) use ($value) {
             $space = $matches[1] == ' ' ? '&#160;' : ''; /** save space @see convertPattern */
+
             return $matches[2] . $space . $value . $matches[3];
         };
 
@@ -75,8 +76,8 @@ class Matcher
     }
 
     /**
-     * @param string[] $vars
-     * @param string $text
+     * @param  string[] $vars
+     * @param  string   $text
      * @return string
      */
     public function replaceMarks(array $vars, $text)
@@ -89,7 +90,7 @@ class Matcher
     }
 
     /**
-     * @param string $text
+     * @param  string   $text
      * @return string[]
      */
     public function getMarks($text)

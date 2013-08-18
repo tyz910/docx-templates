@@ -15,7 +15,7 @@ class Template
 
     /**
      * @param Document $doc
-     * @param Matcher $matcher
+     * @param Matcher  $matcher
      */
     public function __construct(Document $doc, Matcher $matcher)
     {
