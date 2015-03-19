@@ -5,7 +5,7 @@ class Matcher
 {
     const MARK_DEFAULT_PATTERN = '{{%s}}'; // how to display mark in template (printf format, where %s - mark name)
     const MARK_NAME_REGEXP = '[a-z0-9_]+'; // mark name limitations
-    const EMPTY_REGEXP = '(<(?:(?!>.<).)*>|)'; // trash tags without content or empty
+    const EMPTY_REGEXP = '(<(?:(?!>[^>]+<).)*>|)'; // trash tags without content or empty
 
     /**
      * @var string
@@ -43,17 +43,6 @@ class Matcher
     }
 
     /**
-     * @param string $mark
-     * @throws Exception\Template\WrongMarkNameException
-     */
-    private function validateMarkName($mark)
-    {
-        if (!preg_match(sprintf('/^%s$/u', self::MARK_NAME_REGEXP), $mark)) {
-            throw new Exception\Template\WrongMarkNameException($mark);
-        }
-    }
-
-    /**
      * @param  string $key
      * @param  string $value
      * @param  string $text
@@ -61,8 +50,6 @@ class Matcher
      */
     public function replaceMark($key, $value, $text)
     {
-        $this->validateMarkName($key);
-
         $pattern = sprintf($this->replaceRegexp, preg_quote($key));
         $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
 
