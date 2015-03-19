@@ -1,6 +1,8 @@
 <?php
 namespace DocxTemplate;
 
+use DocxTemplate\Content\DocBlock;
+
 class Template
 {
     /**
@@ -70,6 +72,53 @@ class Template
         }
 
         return $this;
+    }
+
+    /**
+     * @param string|string[] $key
+     * @param bool|string $placeMark
+     * @return DocBlock
+     */
+    public function extractBlock($key, $placeMark = true)
+    {
+        if (is_array($key)) {
+            $blockStart = $key[0];
+            $blockEnd = $key[1];
+        } else {
+            $blockStart = $key . "_start";
+            $blockEnd = $key . "_end";
+        }
+
+        if (is_bool($placeMark) && $placeMark) {
+            $placeMark = is_string($key) ? $key : $blockStart;
+        }
+
+        $uniqId = uniqid();
+        $this->assign([
+            $blockStart => "BLOCK_OPEN" . $uniqId,
+            $blockEnd   => "BLOCK_CLOSE" . $uniqId
+        ]);
+
+        $pattern = "/BLOCK_OPEN{$uniqId}(.*)BLOCK_CLOSE{$uniqId}/";
+        $blockContent = "";
+        $content = preg_replace_callback($pattern, function ($matches) use (&$blockContent, $placeMark) {
+            if (isset($matches[1])) {
+                $blockContent = $matches[1];
+            }
+
+            if ($placeMark) {
+                return $this->matcher->toMark($placeMark);
+            } else {
+                return "";
+            }
+
+        }, $this->doc->getContent());
+
+        $this->doc->setContent($content);
+
+        // todo clean $blockContent
+
+        return new DocBlock($blockContent);
     }
 
     /**

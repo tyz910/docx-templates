@@ -1,6 +1,8 @@
 <?php
 namespace DocxTemplate;
 
+use DocxTemplate\Content\UnescapedValueInterface;
+
 class Matcher
 {
     const MARK_DEFAULT_PATTERN = '{{%s}}'; // how to display mark in template (printf format, where %s - mark name)
@@ -13,10 +15,16 @@ class Matcher
     private $replaceRegexp;
 
     /**
+     * @var string
+     */
+    private $markPattern;
+
+    /**
      * @param string $markPattern
      */
     public function __construct($markPattern = self::MARK_DEFAULT_PATTERN)
     {
+        $this->markPattern = $markPattern;
         $this->replaceRegexp = $this->convertPattern($markPattern);
     }
 
@@ -44,15 +52,19 @@ class Matcher
 
     /**
      * @param  string $key
-     * @param  string $value
+     * @param  string|UnescapedValueInterface $value
      * @param  string $text
      * @return string
      */
     public function replaceMark($key, $value, $text)
     {
-        $pattern = sprintf($this->replaceRegexp, preg_quote($key));
-        $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        if ($value instanceof UnescapedValueInterface) {
+            $value = $value->getUnescapedValue();
+        } else {
+            $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        }
 
+        $pattern = sprintf($this->replaceRegexp, preg_quote($key));
         $replace = function ($matches) use ($value) {
             $space = $matches[1] == ' ' ? '&#160;' : ''; /** save space @see convertPattern */
 
@@ -86,5 +98,14 @@ class Matcher
         preg_match_all($pattern, $text, $matches);
 
         return array_unique($matches['mark']);
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    public function toMark($name)
+    {
+        return sprintf($this->markPattern, $name);
     }
 }
