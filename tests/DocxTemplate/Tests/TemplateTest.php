@@ -72,12 +72,6 @@ class TemplateTest extends BaseTestCase
         $this->assertContains('русский текст', $content);
     }
 
-    public function testAssignWrongMarkName()
-    {
-        $this->setExpectedException('DocxTemplate\Exception\Template\WrongMarkNameException');
-        $this->template->assign('var 1', 'val1');
-    }
-
     public function testGetMarks()
     {
         $this->assertEquals(['var1', 'var2', 'var3', 'var4'], $this->template->getMarks());
