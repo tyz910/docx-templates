@@ -1,10 +1,10 @@
 <?php
 namespace DocxTemplate\Content;
 
-interface UnescapedValueInterface
+interface ContentInterface
 {
     /**
      * @return string
      */
-    public function getUnescapedValue();
+    public function getContent();
 }

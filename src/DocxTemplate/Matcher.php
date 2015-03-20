@@ -1,7 +1,7 @@
 <?php
 namespace DocxTemplate;
 
-use DocxTemplate\Content\UnescapedValueInterface;
+use DocxTemplate\Content\ContentInterface;
 
 class Matcher
 {
@@ -52,14 +52,14 @@ class Matcher
 
     /**
      * @param  string $key
-     * @param  string|UnescapedValueInterface $value
+     * @param  string|ContentInterface $value
      * @param  string $text
      * @return string
      */
     public function replaceMark($key, $value, $text)
     {
-        if ($value instanceof UnescapedValueInterface) {
-            $value = $value->getUnescapedValue();
+        if ($value instanceof ContentInterface) {
+            $value = $value->getContent();
         } else {
             $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
         }
@@ -98,6 +98,34 @@ class Matcher
         preg_match_all($pattern, $text, $matches);
 
         return array_unique($matches['mark']);
+    }
+
+    /**
+     * @param string $fromMark
+     * @param string $toMark
+     * @param string $placeMark
+     * @param string $text
+     * @return string
+     */
+    public function extractRange($fromMark, $toMark, $placeMark, &$text)
+    {
+        $uniqId = uniqid();
+        $text = $this->replaceMarks([
+            $fromMark => "FROM_MARK_" . $uniqId,
+            $toMark   => "TO_MARK_" . $uniqId
+        ], $text);
+
+        $pattern = "/FROM_MARK_{$uniqId}(.*)TO_MARK_{$uniqId}/";
+        $rangeContent = "";
+        $text = preg_replace_callback($pattern, function ($matches) use (&$rangeContent, $placeMark) {
+            if (isset($matches[1])) {
+                $rangeContent = $matches[1];
+            }
+
+            return $this->toMark($placeMark);
+        }, $text);
+
+        return $rangeContent;
     }
 
     /**

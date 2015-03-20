@@ -71,46 +71,4 @@ class TemplateTest extends BaseTestCase
         $content = $this->saveAndGetContent();
         $this->assertContains('русский текст', $content);
     }
-
-    public function testGetMarks()
-    {
-        $this->assertEquals(['var1', 'var2', 'var3', 'var4'], $this->template->getMarks());
-
-        $this->template->assign([
-            'var1' => 'val1',
-            'var2' => 'val2'
-        ]);
-        $this->assertEquals(['var3', 'var4'], $this->template->getMarks());
-
-        $this->template->assign([
-            'var3' => 'val3',
-            'var4' => 'val4'
-        ]);
-        $this->assertEquals([], $this->template->getMarks());
-    }
-
-    public function testIsFilled()
-    {
-        $this->assertFalse($this->template->isFilled());
-
-        $this->template->assign([
-            'var1' => 'val1',
-            'var2' => 'val2',
-            'var3' => 'val3',
-            'var4' => 'val4'
-        ]);
-
-        $this->assertTrue($this->template->isFilled());
-    }
-
-    public function testRemoveMarks()
-    {
-        $this->template->removeMarks();
-        $content = $this->saveAndGetContent();
-
-        $this->assertNotContains('var1', $content);
-        $this->assertNotContains('var2', $content);
-        $this->assertNotContains('var3', $content);
-        $this->assertNotContains('var4', $content);
-    }
 }

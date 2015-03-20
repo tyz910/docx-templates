@@ -6,9 +6,18 @@ use DocxTemplate\TemplateFactory;
 $doc = new ExampleDoc("02-blocks.docx");
 $template = TemplateFactory::load($doc->getOriginalPath());
 
-$block = $template->extractBlock("block");
-$template->assign([
-    "block_placement" => $block
+$template->loop("block", [
+    [
+        'block_var' => "var1"
+    ],
+
+    [
+        'block_var' => "var2"
+    ],
+
+    [
+        'block_var' => "var3"
+    ]
 ]);
 
 $template->save($doc->getProcessedPath());
