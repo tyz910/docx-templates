@@ -40,6 +40,19 @@ class LoopCollection extends ContentCollection
     }
 
     /**
+     * @param array $row
+     * @return $this
+     */
+    public function assignRow(array $row)
+    {
+        $item = $this->itemStart();
+        $item->assign($row);
+        $this->itemEnd();
+
+        return $this;
+    }
+
+    /**
      * @return MarkedContent
      */
     public function itemStart()

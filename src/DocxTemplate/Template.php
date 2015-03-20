@@ -1,7 +1,6 @@
 <?php
 namespace DocxTemplate;
 
-use DocxTemplate\Content\Collection\LoopCollection;
 use DocxTemplate\Content\MarkedContent;
 
 class Template
@@ -70,16 +69,8 @@ class Template
      */
     public function loop($name, $rows = [])
     {
-        $block = $this->docContent->extractContent($name);
-        $loop = new LoopCollection($block);
+        $this->docContent->loop($name, $rows);
 
-        foreach ($rows as $row) {
-            $item = $loop->itemStart();
-            $item->assign($row);
-            $loop->itemEnd();
-        }
-
-        $loop->finish();
         return $this;
     }
 }

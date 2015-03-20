@@ -1,6 +1,7 @@
 <?php
 namespace DocxTemplate\Content;
 
+use DocxTemplate\Content\Collection\LoopCollection;
 use DocxTemplate\Matcher;
 
 class MarkedContent extends Content
@@ -52,6 +53,24 @@ class MarkedContent extends Content
         $content = new MarkedContent($extracted, $this->matcher);
         $content->bindTo($uniqName, $this);
         return $content;
+    }
+
+    /**
+     * @param string $name
+     * @param string[][] $rows
+     * @return $this
+     */
+    public function loop($name, $rows = [])
+    {
+        $block = $this->extractContent($name);
+        $loop = new LoopCollection($block);
+
+        foreach ($rows as $row) {
+            $loop->assignRow($row);
+        }
+
+        $loop->finish();
+        return $this;
     }
 
     /**
