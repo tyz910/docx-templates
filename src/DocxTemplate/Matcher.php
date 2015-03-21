@@ -5,49 +5,73 @@ use DocxTemplate\Content\ContentInterface;
 
 class Matcher
 {
-    const MARK_DEFAULT_PATTERN = '{{%s}}'; // how to display mark in template (printf format, where %s - mark name)
-    const MARK_NAME_REGEXP = '[a-z0-9_]+'; // mark name limitations
-    const EMPTY_REGEXP = '(<(?:(?!>[^>]+<).)*>|)'; // trash tags without content or empty
+    const DEFAULT_OPEN = "{{";
+    const DEFAULT_CLOSE = "}}";
+    const DEFAULT_MARK_NAME_REGEXP = '[a-z0-9_]+';
+    const EMPTY_REGEXP = '(?:<[^>]+>)*'; // tags without content or empty
 
     /**
      * @var string
      */
-    private $replaceRegexp;
+    private $open;
 
     /**
      * @var string
      */
-    private $markPattern;
+    private $close;
 
     /**
-     * @param string $markPattern
+     * @var string
      */
-    public function __construct($markPattern = self::MARK_DEFAULT_PATTERN)
+    private $openRegExp;
+
+    /**
+     * @var string
+     */
+    private $closeRegExp;
+
+    /**
+     * @var string
+     */
+    private $markNameRegExp;
+
+    /**
+     * @param string $open
+     * @param string $close
+     * @param bool $strictMatch
+     * @param string $markNameRegExp
+     */
+    public function __construct($open = self::DEFAULT_OPEN, $close = self::DEFAULT_CLOSE, $strictMatch = false, $markNameRegExp = null)
     {
-        $this->markPattern = $markPattern;
-        $this->replaceRegexp = $this->convertPattern($markPattern);
+        $this->open = $open;
+        $this->close = $close;
+
+        if ($this->open) {
+            if ($strictMatch) {
+                $this->openRegExp = preg_quote($this->open, "/");
+            } else {
+                $this->openRegExp = preg_quote($this->open, "/") . self::EMPTY_REGEXP;
+            }
+        }
+
+        if ($this->close) {
+            if ($strictMatch) {
+                $this->closeRegExp = preg_quote($this->close, "/");
+            } else {
+                $this->closeRegExp = self::EMPTY_REGEXP . preg_quote($this->close, "/");
+            }
+        }
+
+        $this->markNameRegExp = $markNameRegExp ? $markNameRegExp : self::DEFAULT_MARK_NAME_REGEXP;
     }
 
     /**
-     * @param  string $pattern
+     * @param string $name
      * @return string
      */
-    private function convertPattern($pattern)
+    public function getMarkRegExp($name)
     {
-        list($open, $close) = explode('%s', $pattern);
-
-        $regexp =
-            '/'
-            .'( |)' // for save space if after replacement it will be on the end of tag without xml:space="preserve"
-            .preg_quote($open)
-            .self::EMPTY_REGEXP
-            .'%s'
-            .self::EMPTY_REGEXP
-            .preg_quote($close)
-            .'/u'
-        ;
-
-        return $regexp;
+        return $this->openRegExp . $name . $this->closeRegExp;
     }
 
     /**
@@ -64,14 +88,7 @@ class Matcher
             $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
         }
 
-        $pattern = sprintf($this->replaceRegexp, preg_quote($key));
-        $replace = function ($matches) use ($value) {
-            $space = $matches[1] == ' ' ? '&#160;' : ''; /** save space @see convertPattern */
-
-            return $matches[2] . $space . $value . $matches[3];
-        };
-
-        return preg_replace_callback($pattern, $replace, $text);
+        return preg_replace('/' . $this->getMarkRegExp($key) . '/u', $value, $text);
     }
 
     /**
@@ -94,7 +111,7 @@ class Matcher
      */
     public function getMarks($text)
     {
-        $pattern = sprintf($this->replaceRegexp, '(?P<mark>' . self::MARK_NAME_REGEXP . ')');
+        $pattern = $this->getMarkRegExp('(?P<mark>' . self::DEFAULT_MARK_NAME_REGEXP . ')');
         preg_match_all($pattern, $text, $matches);
 
         return array_unique($matches['mark']);
@@ -109,17 +126,11 @@ class Matcher
      */
     public function extractRange($fromMark, $toMark, $placeMark, &$text)
     {
-        $uniqId = uniqid();
-        $tmpReplace = [
-            $fromMark => "MARK_" . $uniqId,
-        ];
-        if ($toMark != $fromMark) {
-            $tmpReplace[$toMark] = "MARK_" . $uniqId;
-        }
-        $text = $this->replaceMarks($tmpReplace, $text);
-
-        $pattern = "/MARK_{$uniqId}(.*)MARK_{$uniqId}/";
+        $from = $this->getMarkRegExp($fromMark);
+        $to = $this->getMarkRegExp($toMark);
+        $pattern = "/{$from}(.*){$to}/";
         $rangeContent = "";
+
         $text = preg_replace_callback($pattern, function ($matches) use (&$rangeContent, $placeMark) {
             if (isset($matches[1])) {
                 $rangeContent = $matches[1];
@@ -137,6 +148,6 @@ class Matcher
      */
     public function toMark($name)
     {
-        return sprintf($this->markPattern, $name);
+        return $this->open . $name . $this->close;
     }
 }

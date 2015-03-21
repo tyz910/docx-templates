@@ -115,10 +115,11 @@ class Document
 
     /**
      * @param  string $uri
+     * @param  bool $noCache
      * @throws Exception\Zip\ContentReadException
      * @return string
      */
-    public function getContent($uri = self::DOCUMENT_XML_URI)
+    public function getContent($uri = self::DOCUMENT_XML_URI, $noCache = false)
     {
         if (!array_key_exists($uri, $this->readCache)) {
             $content = $this->getZip()->getFromName($uri);
@@ -126,7 +127,11 @@ class Document
                 throw new Exception\Zip\ContentReadException($uri);
             }
 
-            $this->readCache[$uri] = $content;
+            if ($noCache) {
+                return $content;
+            } else {
+                $this->readCache[$uri] = $content;
+            }
         }
 
         return $this->readCache[$uri];

@@ -11,9 +11,14 @@ class Template
     private $doc;
 
     /**
-     * @var MarkedContent
+     * @var Matcher
      */
-    private $docContent;
+    private $matcher;
+
+    /**
+     * @var MarkedContent[]
+     */
+    private $docContents = [];
 
     /**
      * @param Document $doc
@@ -22,7 +27,7 @@ class Template
     public function __construct(Document $doc, Matcher $matcher)
     {
         $this->doc = $doc;
-        $this->docContent = new MarkedContent($this->doc->getContent(), $matcher);
+        $this->matcher = $matcher;
     }
 
     /**
@@ -34,11 +39,16 @@ class Template
     }
 
     /**
+     * @param string $uri
      * @return MarkedContent
      */
-    public function getDocContent()
+    public function getDocContent($uri = Document::DOCUMENT_XML_URI)
     {
-        return $this->docContent;
+        if (!isset($this->docContents[$uri])) {
+            $this->docContents[$uri] = new MarkedContent($this->doc->getContent($uri, true), $this->matcher);
+        }
+
+        return $this->docContents[$uri];
     }
 
     /**
@@ -46,7 +56,10 @@ class Template
      */
     public function save($filePath = null)
     {
-        $this->doc->setContent($this->docContent->getContent());
+        foreach ($this->docContents as $uri => $docContent) {
+            $this->doc->setContent($docContent->getContent(), $uri);
+        }
+
         $this->doc->save($filePath);
     }
 
@@ -57,7 +70,7 @@ class Template
      */
     public function assign($key, $value = null)
     {
-        $this->docContent->assign($key, $value);
+        $this->getDocContent()->assign($key, $value);
 
         return $this;
     }
@@ -69,7 +82,7 @@ class Template
      */
     public function loop($name, $rows = [])
     {
-        $this->docContent->loop($name, $rows);
+        $this->getDocContent()->loop($name, $rows);
 
         return $this;
     }
