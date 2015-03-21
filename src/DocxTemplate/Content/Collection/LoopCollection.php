@@ -13,7 +13,7 @@ class LoopCollection extends ContentCollection
     /**
      * @var MarkedContent
      */
-    private $currentItem;
+    private $currentIteration;
 
     /**
      * @param MarkedContent $content
@@ -34,46 +34,36 @@ class LoopCollection extends ContentCollection
     /**
      * @return MarkedContent
      */
-    public function getCurrentItem()
+    public function getCurrentIteration()
     {
-        return $this->currentItem;
+        return $this->currentIteration;
     }
 
     /**
-     * @param array $row
-     * @return $this
-     */
-    public function assignRow(array $row)
-    {
-        $item = $this->itemStart();
-        $item->assign($row);
-        $this->itemEnd();
-
-        return $this;
-    }
-
-    /**
+     * @param array $values
      * @return MarkedContent
      */
-    public function itemStart()
+    public function iterate(array $values = [])
     {
-        if (!$this->currentItem) {
-            $this->currentItem = clone $this->baseContent;
+        if ($this->currentIteration) {
+            $this->addContent($this->currentIteration);
         }
 
-        return $this->currentItem;
-    }
-
-    public function itemEnd()
-    {
-        if ($this->currentItem) {
-            $this->addContent($this->currentItem);
-            $this->currentItem = null;
+        $this->currentIteration = clone $this->baseContent;
+        if ($values) {
+            $this->currentIteration->assign($values);
         }
+
+        return $this->currentIteration;
     }
 
     public function finish()
     {
+        if ($this->currentIteration) {
+            $this->addContent($this->currentIteration);
+            $this->currentIteration = null;
+        }
+
         $this->baseContent->getBindedTo()->assign([
             $this->baseContent->getBindedMark() => $this
         ]);

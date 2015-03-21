@@ -46,12 +46,11 @@ class MarkedContent extends Content
     public function extractContent($name)
     {
         $content = $this->getContent();
-        $uniqName = uniqid($name);
-        $extracted = $this->matcher->extractRange($name . "_start", $name . "_end", $uniqName, $content);
+        $extracted = $this->matcher->extractRange($name, $name, $name, $content);
         $this->setContent($content);
 
         $content = new MarkedContent($extracted, $this->matcher);
-        $content->bindTo($uniqName, $this);
+        $content->bindTo($name, $this);
         return $content;
     }
 
@@ -66,7 +65,7 @@ class MarkedContent extends Content
         $loop = new LoopCollection($block);
 
         foreach ($rows as $row) {
-            $loop->assignRow($row);
+            $loop->iterate($row);
         }
 
         $loop->finish();

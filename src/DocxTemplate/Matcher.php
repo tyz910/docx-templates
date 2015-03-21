@@ -110,12 +110,15 @@ class Matcher
     public function extractRange($fromMark, $toMark, $placeMark, &$text)
     {
         $uniqId = uniqid();
-        $text = $this->replaceMarks([
-            $fromMark => "FROM_MARK_" . $uniqId,
-            $toMark   => "TO_MARK_" . $uniqId
-        ], $text);
+        $tmpReplace = [
+            $fromMark => "MARK_" . $uniqId,
+        ];
+        if ($toMark != $fromMark) {
+            $tmpReplace[$toMark] = "MARK_" . $uniqId;
+        }
+        $text = $this->replaceMarks($tmpReplace, $text);
 
-        $pattern = "/FROM_MARK_{$uniqId}(.*)TO_MARK_{$uniqId}/";
+        $pattern = "/MARK_{$uniqId}(.*)MARK_{$uniqId}/";
         $rangeContent = "";
         $text = preg_replace_callback($pattern, function ($matches) use (&$rangeContent, $placeMark) {
             if (isset($matches[1])) {

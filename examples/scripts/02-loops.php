@@ -3,20 +3,20 @@ require "bootstrap.php";
 
 use DocxTemplate\TemplateFactory;
 
-$doc = new ExampleDoc("02-blocks.docx");
+$doc = new ExampleDoc("02-loops.docx");
 $template = TemplateFactory::load($doc->getOriginalPath());
 
-$template->loop("block", [
+$template->loop("loop", [
     [
-        'block_var' => "var1"
+        'var' => "iteration1"
     ],
 
     [
-        'block_var' => "var2"
+        'var' => "iteration2"
     ],
 
     [
-        'block_var' => "var3"
+        'var' => "iteration3"
     ]
 ]);
 
