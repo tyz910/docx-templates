@@ -1,9 +1,9 @@
 <?php
-namespace DocxTemplate;
+namespace DocxTemplate\Matcher;
 
 use DocxTemplate\Content\ContentInterface;
 
-class Matcher
+class RegExpMatcher implements MatcherInterface
 {
     const DEFAULT_OPEN = "{{";
     const DEFAULT_CLOSE = "}}";
@@ -13,27 +13,27 @@ class Matcher
     /**
      * @var string
      */
-    private $open;
+    protected $open;
 
     /**
      * @var string
      */
-    private $close;
+    protected $close;
 
     /**
      * @var string
      */
-    private $openRegExp;
+    protected $openRegExp;
 
     /**
      * @var string
      */
-    private $closeRegExp;
+    protected $closeRegExp;
 
     /**
      * @var string
      */
-    private $markNameRegExp;
+    protected $markNameRegExp;
 
     /**
      * @param string $open
@@ -69,18 +69,18 @@ class Matcher
      * @param string $name
      * @return string
      */
-    public function getMarkRegExp($name)
+    protected function getMarkRegExp($name)
     {
-        return $this->openRegExp . $name . $this->closeRegExp;
+        return $this->openRegExp . preg_quote($name, "/") . $this->closeRegExp;
     }
 
     /**
-     * @param  string $key
+     * @param  string $mark
      * @param  string|ContentInterface $value
      * @param  string $text
      * @return string
      */
-    public function replaceMark($key, $value, $text)
+    public function replaceMark($mark, $value, $text)
     {
         if ($value instanceof ContentInterface) {
             $value = $value->getContent();
@@ -88,21 +88,7 @@ class Matcher
             $value = htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
         }
 
-        return preg_replace('/' . $this->getMarkRegExp($key) . '/u', $value, $text);
-    }
-
-    /**
-     * @param  string[] $vars
-     * @param  string   $text
-     * @return string
-     */
-    public function replaceMarks(array $vars, $text)
-    {
-        foreach ($vars as $key => $value) {
-            $text = $this->replaceMark($key, $value, $text);
-        }
-
-        return $text;
+        return preg_replace('/' . $this->getMarkRegExp($mark) . '/u', $value, $text);
     }
 
     /**
@@ -146,7 +132,7 @@ class Matcher
      * @param string $name
      * @return string
      */
-    public function toMark($name)
+    protected function toMark($name)
     {
         return $this->open . $name . $this->close;
     }

@@ -2,7 +2,7 @@
 namespace DocxTemplate\Tests;
 
 use DocxTemplate\Document;
-use DocxTemplate\Matcher;
+use DocxTemplate\Matcher\RegExpMatcher;
 use DocxTemplate\Template;
 
 class TemplateTest extends BaseTestCase
@@ -16,7 +16,7 @@ class TemplateTest extends BaseTestCase
     {
         $this->template = new Template(
             new Document($this->getFixturePath('test.docx')),
-            new Matcher()
+            new RegExpMatcher()
         );
         parent::setUp();
     }

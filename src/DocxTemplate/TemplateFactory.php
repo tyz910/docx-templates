@@ -1,10 +1,13 @@
 <?php
 namespace DocxTemplate;
 
+use DocxTemplate\Matcher\MatcherInterface;
+use DocxTemplate\Matcher\RegExpMatcher;
+
 class TemplateFactory
 {
     /**
-     * @var Matcher
+     * @var MatcherInterface
      */
     private static $defaultMatcher;
 
@@ -16,27 +19,27 @@ class TemplateFactory
      */
     public static function useMarkSyntax($open, $close, $strictMatch = false, $markNameRegExp = null)
     {
-        self::$defaultMatcher = new Matcher($open, $close, $strictMatch, $markNameRegExp);
+        self::$defaultMatcher = new RegExpMatcher($open, $close, $strictMatch, $markNameRegExp);
     }
 
     /**
-     * @return Matcher
+     * @return MatcherInterface
      */
     protected static function getDefaultMatcher()
     {
         if (!self::$defaultMatcher) {
-            self::$defaultMatcher = new Matcher();
+            self::$defaultMatcher = new RegExpMatcher();
         }
 
         return self::$defaultMatcher;
     }
 
     /**
-     * @param  string   $filePath
-     * @param  Matcher  $matcher
+     * @param  string            $filePath
+     * @param  MatcherInterface  $matcher
      * @return Template
      */
-    public static function load($filePath, Matcher $matcher = null)
+    public static function load($filePath, MatcherInterface $matcher = null)
     {
         if (!$matcher) {
             $matcher = self::getDefaultMatcher();

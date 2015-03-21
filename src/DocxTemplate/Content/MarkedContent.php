@@ -2,20 +2,20 @@
 namespace DocxTemplate\Content;
 
 use DocxTemplate\Content\Collection\LoopCollection;
-use DocxTemplate\Matcher;
+use DocxTemplate\Matcher\MatcherInterface;
 
 class MarkedContent extends Content
 {
     /**
-     * @var Matcher
+     * @var MatcherInterface
      */
     private $matcher;
 
     /**
-     * @param string $content
-     * @param Matcher $matcher
+     * @param string            $content
+     * @param MatcherInterface  $matcher
      */
-    public function __construct($content, Matcher $matcher)
+    public function __construct($content, MatcherInterface $matcher)
     {
         parent::__construct($content);
         $this->matcher = $matcher;

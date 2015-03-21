@@ -2,6 +2,7 @@
 namespace DocxTemplate;
 
 use DocxTemplate\Content\MarkedContent;
+use DocxTemplate\Matcher\MatcherInterface;
 
 class Template
 {
@@ -11,7 +12,7 @@ class Template
     private $doc;
 
     /**
-     * @var Matcher
+     * @var MatcherInterface
      */
     private $matcher;
 
@@ -21,10 +22,10 @@ class Template
     private $docContents = [];
 
     /**
-     * @param Document $doc
-     * @param Matcher  $matcher
+     * @param Document          $doc
+     * @param MatcherInterface  $matcher
      */
-    public function __construct(Document $doc, Matcher $matcher)
+    public function __construct(Document $doc, MatcherInterface $matcher)
     {
         $this->doc = $doc;
         $this->matcher = $matcher;
