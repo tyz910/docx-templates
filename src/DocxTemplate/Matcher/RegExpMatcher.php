@@ -5,30 +5,30 @@ use DocxTemplate\Content\ContentInterface;
 
 class RegExpMatcher implements MatcherInterface
 {
-    const DEFAULT_OPEN = "{{";
-    const DEFAULT_CLOSE = "}}";
+    const DEFAULT_MARK_PREFIX = "{{";
+    const DEFAULT_MARK_SUFFIX = "}}";
     const DEFAULT_MARK_NAME_REGEXP = '[a-z0-9_]+';
     const EMPTY_REGEXP = '(?:<[^>]+>)*'; // tags without content or empty
 
     /**
      * @var string
      */
-    protected $open;
+    protected $markPrefix;
 
     /**
      * @var string
      */
-    protected $close;
+    protected $markSuffix;
 
     /**
      * @var string
      */
-    protected $openRegExp;
+    protected $markPrefixRegExp;
 
     /**
      * @var string
      */
-    protected $closeRegExp;
+    protected $markSuffixRegExp;
 
     /**
      * @var string
@@ -36,29 +36,29 @@ class RegExpMatcher implements MatcherInterface
     protected $markNameRegExp;
 
     /**
-     * @param string $open
-     * @param string $close
+     * @param string $prefix
+     * @param string $suffix
      * @param bool $strictMatch
      * @param string $markNameRegExp
      */
-    public function __construct($open = self::DEFAULT_OPEN, $close = self::DEFAULT_CLOSE, $strictMatch = false, $markNameRegExp = null)
+    public function __construct($prefix = self::DEFAULT_MARK_PREFIX, $suffix = self::DEFAULT_MARK_SUFFIX, $strictMatch = false, $markNameRegExp = null)
     {
-        $this->open = $open;
-        $this->close = $close;
+        $this->markPrefix = $prefix;
+        $this->markSuffix = $suffix;
 
-        if ($this->open) {
+        if ($this->markPrefix) {
             if ($strictMatch) {
-                $this->openRegExp = preg_quote($this->open, "/");
+                $this->markPrefixRegExp = preg_quote($this->markPrefix, "/");
             } else {
-                $this->openRegExp = preg_quote($this->open, "/") . self::EMPTY_REGEXP;
+                $this->markPrefixRegExp = preg_quote($this->markPrefix, "/") . self::EMPTY_REGEXP;
             }
         }
 
-        if ($this->close) {
+        if ($this->markSuffix) {
             if ($strictMatch) {
-                $this->closeRegExp = preg_quote($this->close, "/");
+                $this->markSuffixRegExp = preg_quote($this->markSuffix, "/");
             } else {
-                $this->closeRegExp = self::EMPTY_REGEXP . preg_quote($this->close, "/");
+                $this->markSuffixRegExp = self::EMPTY_REGEXP . preg_quote($this->markSuffix, "/");
             }
         }
 
@@ -71,7 +71,7 @@ class RegExpMatcher implements MatcherInterface
      */
     protected function getMarkRegExp($name)
     {
-        return $this->openRegExp . preg_quote($name, "/") . $this->closeRegExp;
+        return $this->markPrefixRegExp . preg_quote($name, "/") . $this->markSuffixRegExp;
     }
 
     /**
@@ -114,10 +114,9 @@ class RegExpMatcher implements MatcherInterface
     {
         $from = $this->getMarkRegExp($fromMark);
         $to = $this->getMarkRegExp($toMark);
-        $pattern = "/{$from}(.*){$to}/";
         $rangeContent = "";
 
-        $text = preg_replace_callback($pattern, function ($matches) use (&$rangeContent, $placeMark) {
+        $text = preg_replace_callback("/{$from}(.*){$to}/", function ($matches) use (&$rangeContent, $placeMark) {
             if (isset($matches[1])) {
                 $rangeContent = $matches[1];
             }
@@ -134,6 +133,6 @@ class RegExpMatcher implements MatcherInterface
      */
     protected function toMark($name)
     {
-        return $this->open . $name . $this->close;
+        return $this->markPrefix . $name . $this->markSuffix;
     }
 }
