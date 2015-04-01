@@ -12,7 +12,7 @@ script:
 
 before_script:
   - composer require satooshi/php-coveralls 0.6.*
-  - composer update
+  - composer update --no-dev
 
 after_script:
   - php vendor/bin/coveralls -v
