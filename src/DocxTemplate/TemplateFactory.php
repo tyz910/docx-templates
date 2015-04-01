@@ -12,14 +12,14 @@ class TemplateFactory
     private static $defaultMatcher;
 
     /**
-     * @param string $open
-     * @param string $close
+     * @param string $prefix
+     * @param string $suffix
      * @param bool   $strictMatch
      * @param string $markNameRegExp
      */
-    public static function useMarkSyntax($open, $close, $strictMatch = false, $markNameRegExp = null)
+    public static function useMarkSyntax($prefix, $suffix, $strictMatch = false, $markNameRegExp = null)
     {
-        self::$defaultMatcher = new RegExpMatcher($open, $close, $strictMatch, $markNameRegExp);
+        self::$defaultMatcher = new RegExpMatcher($prefix, $suffix, $strictMatch, $markNameRegExp);
     }
 
     /**

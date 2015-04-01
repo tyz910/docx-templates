@@ -35,7 +35,8 @@ Also you can use any search-pattern spelling you wish:
 <?php
 use DocxTemplate\TemplateFactory;
 
-$template = TemplateFactory::load('template.docx', '${%s}'); // %s will be replaced with mark name
+TemplateFactory::useMarkSyntax('${', '}'); // prefix and suffix
+$template = TemplateFactory::load('template.docx');
 ```
 
 ## Installation using [Composer](http://getcomposer.org/)
