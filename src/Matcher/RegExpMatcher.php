@@ -67,11 +67,12 @@ class RegExpMatcher implements MatcherInterface
 
     /**
      * @param string $name
+     * @param bool $escape
      * @return string
      */
-    protected function getMarkRegExp($name)
+    protected function getMarkRegExp($name, $escape = true)
     {
-        return $this->markPrefixRegExp . preg_quote($name, "/") . $this->markSuffixRegExp;
+        return $this->markPrefixRegExp . ($escape ? preg_quote($name, "/") : $name) . $this->markSuffixRegExp;
     }
 
     /**
@@ -97,7 +98,7 @@ class RegExpMatcher implements MatcherInterface
      */
     public function getMarks($text)
     {
-        $pattern = $this->getMarkRegExp('(?P<mark>' . self::DEFAULT_MARK_NAME_REGEXP . ')');
+        $pattern = '/' . $this->getMarkRegExp('(?P<mark>' . self::DEFAULT_MARK_NAME_REGEXP . ')', false) . '/';
         preg_match_all($pattern, $text, $matches);
 
         return array_unique($matches['mark']);

@@ -4,7 +4,7 @@
     "keywords": ["docx", "template", "word"],
     "authors": [
         {
-            "name": "Eugene Ivanov",
+            "name": "Evgeny Ivanov",
             "email": "tyz910@gmail.com"
         }
     ],
@@ -12,7 +12,12 @@
         "php": ">=5.4",
         "ext-zip": "*"
     },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
     "autoload": {
-        "psr-0": { "DocxTemplate": "src/" }
+        "psr-4": {
+            "DocxTemplate\\": "src/"
+        }
     }
 }
